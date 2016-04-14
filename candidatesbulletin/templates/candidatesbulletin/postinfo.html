@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+
+<h3>Current user profile goes here</h3>
+
+<!-- {{ candidatepost.candidate.student.username }}<br>
+{{ request.user.username }}<br> -->
+
+
+
+<strong>{{ candidatepost.candidate.student.firstname }} {{ candidatepost.candidate.student.lastname }}</strong>&ensp;
+{% if request.user.username == candidatepost.candidate.student.username %}
+	<a href="/candidatesbulletin/{{candidatepost.id}}/deletepost/?link=/candidatesbulletin/">Delete Post</a>
+{% endif %}<br>
+{{ candidatepost.candidate.student.username }} <strong>{{ candidatepost.postname }}</strong><br>
+{{ candidatepost.content }}<br>
+{{ candidatepost.timestamp }}<br>
+
+<br><br>
+<strong>Comments</strong><br><br>
+{% for studcomment in comments %}
+<strong>{{ studcomment.student.firstname }} {{ studcomments.student.lastname }}</strong> &ensp;
+{% if studcomment.student.username == request.user.username %}
+	<a href="/candidatesbulletin/{{candidatepost.id}}/{{studcomment.id}}/delete/?link=/candidatesbulletin/{{candidatepost.id}}/">Delete Comment</a>
+{% endif %}<br>
+{{ studcomment.comment }}<br>
+{{ studcomment.timestamp }}<br>
+<br>
+{% endfor %}<br>
+<strong>Comments Ends</strong>
+
+</body>
+</html>

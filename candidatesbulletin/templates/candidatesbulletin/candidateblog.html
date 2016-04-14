@@ -1,0 +1,93 @@
+{% load get_comments %}
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Candidate - {{ candidate.student.firstname }} {{ candidate.student.lastname }}</title>
+</head>
+<body>
+
+<h3><strong>{{ candidate.student.firstname }} {{ candidate.student.lastname }}</strong></h3>
+
+Username - {{ candidate.student.username }}<br>
+Email    - {{ candidate.student.username }}@iitp.ac.in<br>
+Year     - {{ candidate.student.year }}<br>
+Post Standing for - {{ candidate.postname }}
+<br><br><br><br>
+
+{% if candidate.student.username == request.user.username %}
+
+	<!-- <h3><strong><p align="center">Welcome {{ candidate.student.firstname }} 
+	{{ candidate.student.lastname }}</p></strong></h3> -->
+	<form action = "/candidatesbulletin/addpost/" method="POST"> {% csrf_token %}
+	<p>Message : <textarea type="text" name="content" placeholder ="Write your view" rows="3" cols="50"></textarea></p>
+
+	<input type="hidden" name="path" value="/candidatesbulletin/candidate/{{candidate.student.id}}/">
+	<input type = "submit" name = "submit" value = "submit" >
+	</form>
+	<br><br>
+{% endif %}
+
+
+<!-- Printing the posts along with the comments -->
+
+{% for post in posts %}
+	<strong>{{ post.candidate.student.firstname }} {{ post.candidate.student.lastname }}</strong> &nbsp; {{ post.candidate.student.year }} Year
+	&nbsp; 
+	
+<!-- Giving post delete option -->
+	{% if request.user.username == post.candidate.student.username %}
+		<a href="/candidatesbulletin/{{ post.id }}/deletepost/?link=/candidatesbulletin/candidate/{{post.candidate.student.id}}/ ">Delete</a>
+	{% endif %} <br>
+<!-- Delete option ending -->
+
+
+	{{ post.content }}<br>
+	{{ post.timestamp }}<br><br><br>
+
+<!-- Calling get_comments.py to get value of more for a particular post -->
+<!-- More basically checks if there are more than 3 comments then display recent 3 comments and give a link to all the comments -->
+	{% with morevalue=more|getmorevalue:forloop.counter0 %}
+		{% if morevalue %}
+			<a href="/candidatesbulletin/post/{{post.id}}/">See all comments</a><br><br>
+		{% endif %}
+	{% endwith %}
+<!-- End calling more -->
+
+
+<!-- Calling get_comments.py to get the comments for the current post -->
+	{% with postcomments=comments|getcomments:forloop.counter0 %} 
+	<strong>Comments</strong><br><br>
+		{% for comment in postcomments %}
+			<strong>{{ comment.student.username }}</strong>&nbsp;&nbsp;
+			{% if comment.student.username == request.user.username %}
+				<a href="/candidatesbulletin/{{post.id}}/{{comment.id}}/delete/?link=/candidatesbulletin/candidate/{{post.candidate.student.id}}/">Delete</a>
+			{% endif %}
+			<br>
+			{{ comment.comment }}<br>
+			{{ comment.timestamp }}<br><br>
+		{% empty %}
+			No comments yet
+		{% endfor %}<br><strong>Comments Ends</strong><br><br><br><br>
+	{% endwith %}
+<!-- Comments fetching Done -->
+
+
+<!-- Form for students to add comment -->
+	{% if request.user.is_authenticated %}
+		<form action = "/candidatesbulletin/{{post.id}}/addcomment/?link=/candidatesbulletin/" method="POST"> {% csrf_token %}
+		<p><textarea type="text" name="comment" placeholder ="Write a comment" rows="2" cols="50"></textarea></p>
+		<input type="hidden" name="path" value="/candidatesbulletin/candidate/{{candidate.student.id}}/">
+
+		<input type = "submit" name = "submit" value = "submit" >
+		</form>
+		<br><br>
+	{% endif %}
+<!-- Form Ends -->
+
+{% empty %}
+	No Posts to show
+{% endfor %}
+
+</body>
+</html>
